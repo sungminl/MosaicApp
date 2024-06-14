@@ -1,22 +1,29 @@
 package MosaicAppDemo.appDemo.Entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.time.LocalDate;
 
 @Entity
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(unique = true)
     private String ISBN;
+    @Column
     private String author;
+    @Column
     private String title;
+    @Column
     private String genre;
-    private String publicationDate;
+    @Column
+    private LocalDate publicationDate;
+    @Column
     private double price;
+    @Column
     private int quantity;
 
     public long getId() {
@@ -59,11 +66,11 @@ public class Book {
         this.genre = genre;
     }
 
-    public String getPublicationDate() {
+    public LocalDate getPublicationDate() {
         return publicationDate;
     }
 
-    public void setPublicationDate(String publicationDate) {
+    public void setPublicationDate(LocalDate publicationDate) {
         this.publicationDate = publicationDate;
     }
 

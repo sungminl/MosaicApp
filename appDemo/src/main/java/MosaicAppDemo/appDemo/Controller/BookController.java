@@ -5,8 +5,11 @@ import MosaicAppDemo.appDemo.Entities.Book;
 import MosaicAppDemo.appDemo.Repo.BookRepo;
 import MosaicAppDemo.appDemo.Service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -68,15 +71,35 @@ public class BookController {
 //    }
 
     @GetMapping("/books")
-    public List<Book> getBooks(@RequestParam(required = false) String ISBN,
-            @RequestParam(required = false) String title) {
-        return bookService.getBooks(ISBN, title);
+    public Object getBooks(@RequestParam(required = false) String ISBN,
+                               @RequestParam(required = false) String title,
+                               @RequestParam(required = false) Integer page,
+                               @RequestParam(required = false) Integer size,
+                                @RequestParam(required = false, defaultValue = "title") String orderBy,
+                                @RequestParam(required = false, defaultValue = "asc") String direction) {
+        if (page == null) {
+            return bookService.getBooks(ISBN, title, orderBy, direction);
+        } else {
+            if (size == null) {
+                return bookService.getBooksWithPagination(ISBN, title, page, 10, orderBy, direction);
+            } else {
+                return bookService.getBooksWithPagination(ISBN, title, page, size, orderBy, direction);
+            }
+        }
+    }
+
+
+    @GetMapping("/optionalFiltering")
+    public List<Book> getOptionalFiltering(@RequestParam(required = false) String title,
+                                           @RequestParam(required = false) String genre,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return bookService.getOptionalBooks(title, genre, startDate, endDate);
     }
 
     @PostMapping(value = "/addBook")
-    public String addBook(@RequestBody Book book) {
-        bookRepo.save(book);
-        return "Saved book with the title: " + book.getTitle();
+    public Book addBook(@RequestBody Book book) {
+        return bookService.addBook(book);
     }
 
 
@@ -100,13 +123,8 @@ public class BookController {
     }
 
     @DeleteMapping(value = "/deleteBook/{id}")
-    public String deleteBook(@PathVariable long id) {
-        if (bookRepo.existsById(id)) {
-            bookRepo.deleteById(id);
-            return "Deleted book with the ID: " + id;
-        } else {
-            return "Cannot find book with the ID: " + id;
-        }
+    public void deleteBook(@PathVariable long id) {
+        return bookService.deleteBook(id);
     }
 }
 
